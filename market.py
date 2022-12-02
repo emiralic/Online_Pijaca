@@ -1,5 +1,20 @@
 from flask import Flask, render_template
+from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///market.db'
+db = SQLAlchemy(app)
+
+
+class Item(db.Model):
+    ID = db.Column(db.Integer(), primary_key=True)
+    Naziv = db.Column(db.String(length=30), nullable=False, unique=True)
+    Barcode = db.Column(db.Integer(), nullable=False)
+    Cijena = db.Column(db.String(length=12), nullable=False, unique=True)
+    Opis = db.Column(db.String(length=1024), nullable=False, unique=True)
+
+    def __repr__(self):
+        return f'Item {self.name}'
+
 
 @app.route("/")
 @app.route('/home')
@@ -8,9 +23,5 @@ def home_page():
 
 @app.route('/market')
 def market_page():
-    items = [
-        {'ID': 1, 'Naziv': 'Telefon', 'Barcode': '3877002166013', 'Cijena': 500},
-        {'ID': 2, 'Naziv': 'Laptop', 'Barcode': '3877013327023', 'Cijena': 900},
-        {'ID': 3, 'Naziv': 'Računar', 'Barcode': '3877075528823', 'Cijena': 320}
-    ]
+    items = Item.query.all()
     return render_template('market.html', items=items)
